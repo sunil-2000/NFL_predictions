@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score
@@ -54,6 +55,17 @@ class Data():
         accuracy = accuracy_score(self.y_te, y_pred)
         print(f'accuracy: {accuracy}')
         return accuracy
+
+    def rf_evaluate_test(self, model):
+        y_pred = model.predict(self.x_te)
+        accuracy = accuracy_score(self.y_te, y_pred)
+        print(f'accuracy: {accuracy}')
+        return accuracy
+
+    def random_forest(self):
+        model = RandomForestClassifier(n_estimators = 100)
+        model = model.fit(self.x_tr, self.y_tr)
+        return model
     
     def lr_single_prediction(self, model):
         """
