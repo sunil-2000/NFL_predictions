@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score
 
 
 class Data():
-    def __init__(self, csv, classification=True):
+    def __init__(self, csv, classification=True, playoff_encoded=False):
         """
         csv: path to csv
         col_lst: list of columns to use
@@ -30,6 +30,12 @@ class Data():
           'qbelo2_pre', 'qb1_value_pre', 'qb2_value_pre', 'qb1_adj', 
           'qb2_adj', 'qbelo_prob1', 'qbelo_prob2', 'quality', 'Temperature', 
           'DewPoint', 'Humidity', 'Precipitation', 'WindSpeed', 'Pressure']
+        if playoff_encoded:
+            ftrs = ['Playoff__c', 'Playoff__d', 'Playoff__n', 'Playoff__s', 'Playoff__w',
+              'elo1_pre', 'elo2_pre', 'elo_prob1', 'elo_prob2', 'qbelo1_pre',
+              'qbelo2_pre', 'qb1_value_pre', 'qb2_value_pre', 'qb1_adj',
+              'qb2_adj', 'qbelo_prob1', 'qbelo_prob2', 'quality', 'Temperature',
+              'DewPoint', 'Humidity', 'Precipitation', 'WindSpeed', 'Pressure']
         data_matrix = np.array(self.data[ftrs+['home_win']])
         self.x_tr, self.y_tr, self.x_te, self.y_te, self.idx_tr, self.idx_te = Data.train_test_split(data_matrix)
 
