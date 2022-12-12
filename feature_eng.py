@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score
+from sklearn.neural_network import MLPClassifier
 
 
 class Data():
@@ -78,6 +79,17 @@ class Data():
         model = RandomForestClassifier(n_estimators = 100)
         model = model.fit(self.x_tr, self.y_tr)
         return model
+
+    def neural_net(self):
+        model = MLPClassifier(hidden_layer_sizes=(10,10), random_state=1)
+        model = model.fit(self.x_tr, self.y_tr)
+        return model
+
+    def nn_evaluate_test(self, model):
+        y_pred = model.predict(self.x_te)
+        accuracy = accuracy_score(self.y_te, y_pred)
+        print(f'accuracy: {accuracy}')
+        return accuracy
     
     def lr_single_prediction(self, model):
         """
