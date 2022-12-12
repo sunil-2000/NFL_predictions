@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score
 from sklearn.neural_network import MLPClassifier
@@ -38,6 +39,7 @@ class Data():
               'qb2_adj', 'qbelo_prob1', 'qbelo_prob2', 'quality', 'Temperature',
               'DewPoint', 'Humidity', 'Precipitation', 'WindSpeed', 'Pressure']
         data_matrix = np.array(self.data[ftrs+['home_win']])
+        self.X, self.Y = data_matrix[:, :-1], data_matrix[:, -1]
         self.x_tr, self.y_tr, self.x_te, self.y_te, self.idx_tr, self.idx_te = Data.train_test_split(data_matrix)
 
     @staticmethod
@@ -47,17 +49,22 @@ class Data():
         x_tr, x_te, y_tr, y_te, idx_tr, idx_te = train_test_split(x, y, idx, test_size=0.25)
         return x_tr, y_tr, x_te, y_te, idx_tr, idx_te
 
-    def lr(self):
+    def lr(self, normalize=False):
         assert self.x_tr is not None
         # logistic regression requires normalizing data
-        scaler = MinMaxScaler()
-        x_tr = scaler.fit_transform(self.x_tr)
+        x_tr = self.x_tr
+        if normalize:
+            scaler = MinMaxScaler()
+            x_tr = scaler.fit_transform(self.x_tr)
         model = LogisticRegression().fit(x_tr, self.y_tr)
         return model
     
-    def lr_evaluate_test(self, model):
-        scaler = MinMaxScaler()
-        x_te = scaler.fit_transform(self.x_te)
+    def evaluate_test(self, model, normalize=False):
+        if normalize:
+            scaler = MinMaxScaler()
+            x_te = scaler.fit_transform(self.x_te)
+        else:
+            x_te = self.x_te
         y_pred = model.predict(x_te)
         accuracy = accuracy_score(self.y_te, y_pred)
         print(f'accuracy: {accuracy}')
@@ -69,13 +76,7 @@ class Data():
         print(f'accuracy: {accuracy}')
         return accuracy
 
-    def rf_evaluate_test(self, model):
-        y_pred = model.predict(self.x_te)
-        accuracy = accuracy_score(self.y_te, y_pred)
-        print(f'accuracy: {accuracy}')
-        return accuracy
-
-    def random_forest(self):
+    def rf(self):
         model = RandomForestClassifier(n_estimators = 100)
         model = model.fit(self.x_tr, self.y_tr)
         return model
@@ -91,7 +92,7 @@ class Data():
         print(f'accuracy: {accuracy}')
         return accuracy
     
-    def lr_single_prediction(self, model):
+    def single_prediction(self, model):
         """
         random prediction with logistic regression
         show probability output
@@ -115,15 +116,18 @@ class Data():
         print(f'actual game outcome: {home if outcome > 0 else away} won')
         print(f'actual score: {home}: {h_score} {away}: {a_score}')
 
-    def rf(self):
-        pass
 
-    def kfold_validation(self):
-        raise NotImplementedError
-
-    def fit(self):
-        pass
-
-    def predict(self):
-        pass
-
+    def kfold_validation(self, model_lst, normalize=False):
+        X, Y = self.X, self.Y
+        if normalize:
+            scaler = MinMaxScaler()
+            X = scaler.fit_transform(self.X)
+        kf = StratifiedKFold(shuffle=True)
+        out = {}
+        for model in model_lst:
+            model_name = type(model).__name__
+            scores = cross_val_score(
+            model, X, Y, scoring='accuracy', cv=kf, n_jobs=-1)
+            print(model_name)
+            out[model_name] = scores
+        return out
