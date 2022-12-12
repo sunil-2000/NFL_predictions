@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score
 from sklearn.neural_network import MLPClassifier
+from sklearn.decomposition import PCA
+
 
 
 class Data():
@@ -110,7 +112,6 @@ class Data():
         print(f'actual game outcome: {home if outcome > 0 else away} won')
         print(f'actual score: {home}: {h_score} {away}: {a_score}')
 
-
     def kfold_validation(self, model_lst, normalize=False):
         X, Y = self.X, self.Y
         if normalize:
@@ -125,3 +126,8 @@ class Data():
             print(model_name)
             out[model_name] = scores
         return out
+
+    def pca(self):
+        pca = PCA()
+        pca.fit(self.X)
+        return pca
