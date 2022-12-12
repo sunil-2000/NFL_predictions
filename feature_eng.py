@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score
 
@@ -37,6 +38,7 @@ class Data():
               'qb2_adj', 'qbelo_prob1', 'qbelo_prob2', 'quality', 'Temperature',
               'DewPoint', 'Humidity', 'Precipitation', 'WindSpeed', 'Pressure']
         data_matrix = np.array(self.data[ftrs+['home_win']])
+        self.X, self.Y = data_matrix[:, :-1], data_matrix[: -1]
         self.x_tr, self.y_tr, self.x_te, self.y_te, self.idx_tr, self.idx_te = Data.train_test_split(data_matrix)
 
     @staticmethod
@@ -106,8 +108,19 @@ class Data():
     def rf(self):
         pass
 
-    def kfold_validation(self):
-        raise NotImplementedError
+    def kfold_validation(self, model_lst, normalize=True):
+        X, Y = self.X, self.Y
+        if normalize:
+            scaler = MinMaxScaler()
+            X = scaler.fit_transform(self.X)
+        kf = StratifiedKFold(shuffle=True)
+        out = {}
+        for model in model_lst:
+            model_name = type(model).__name__
+            scores = cross_val_score(
+            model, X, Y, scoring='accuracy', cv=kf, n_jobs=-1)
+            out[model_name] = scores
+        return out
 
     def fit(self):
         pass
