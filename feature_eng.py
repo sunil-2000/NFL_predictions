@@ -62,6 +62,12 @@ class Data():
         print(f'accuracy: {accuracy}')
         return accuracy
 
+    def evaluate_train(self, model):
+        y_pred = model.predict(self.x_tr)
+        accuracy = accuracy_score(self.y_tr, y_pred)
+        print(f'accuracy: {accuracy}')
+        return accuracy
+
     def rf_evaluate_test(self, model):
         y_pred = model.predict(self.x_te)
         accuracy = accuracy_score(self.y_te, y_pred)
